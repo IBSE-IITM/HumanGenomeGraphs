@@ -1,0 +1,12 @@
+
+gbz_index: [Enter path to files created by genome graph construction commands]/hg38-pangenome.giraffe.gbz
+
+xg_index: [Enter path to files created by genome graph construction commands]/hg38-pangenome.xg
+
+min_index: [Enter path to files created by genome graph construction commands]/hg38-pangenome.min
+
+dist_index: [Enter path to files created by genome graph construction commands]/hg38-pangenome.dist
+
+reference_fasta_index: [Enter relevant path]/Homo_sapiens_assembly38.fa.fai
+
+reference_fasta: [Enter relevant path]/Homo_sapiens_assembly38.fa

@@ -1,0 +1,284 @@
+
+configfile: "config/config.yaml"
+
+def get_sample_names():
+    '''
+    Function that gets the names of samples from fastq.gz files in the /data/samples folder
+    '''
+    import glob
+    sample_names = []
+    for file in glob.glob('data/samples/*.fastq.gz'):
+        sample_names.append(file[13:-11]) 
+        # "/data/samples/" = 13 characters &&  "_1.fastq.gz" = 11 characters
+    return list(set(sample_names))
+
+# SAMPLES = ["HG001", "HG002"] # uncomment to run per sample by mentioning list of sample names
+SAMPLES = get_sample_names()
+
+
+#This is the rule that snakemake automatically tries to run. Will run all rules required to produce the input files.
+rule all:
+    input:
+        #expand("data/variant_calling/filtered_variants/{sample}_filtered_variants.recode.vcf", sample = SAMPLES)
+        "data/variant_calling/summary_gg_pipeline_variants.csv"
+
+
+#Map the reads to the genome graph (path in config file) with vg giraffe
+rule vg_giraffe:
+    input: 
+        gbz=config["gbz_index"],
+        min=config["min_index"],
+        dist=config["dist_index"],
+        R1_fq="data/samples/{sample}_1.fastq.gz",
+        R2_fq="data/samples/{sample}_2.fastq.gz"
+    output:
+        temp("data/mapped_reads/graph_mapped_{sample}.gam")
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/vg_giraffe/{sample}.log"
+    threads: 25
+    benchmark:
+        "benchmarks/{sample}.rule_1.vg_giraffe.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'VG GIRAFFE starts' >> {log} && echo '-' >> {log} &&"                 # Add start time to log file
+        
+        "(vg giraffe --fastq-in {input.R1_fq} --fastq-in {input.R2_fq} -Z {input.gbz} -m {input.min} -d {input.dist} -t {threads} --progress > {output}) "         # The shell command
+        "2>> {log}"                                                                                                  # write CLI log to log file
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Mapped to genome graph for {input.R1_fq}, {input.R2_fq} with VG GIRAFFE' >> {log} "
+        " && echo '-' >> {log}"                                                                                      # Add end time to log file
+
+
+
+# surject the graph_mappings w.r.t. the reference path
+rule vg_surject:
+    input:
+        gam="data/mapped_reads/graph_mapped_{sample}.gam",
+        xg=config["xg_index"]
+    output:
+        temp("data/surjected_reads/{sample}_surjected.bam")
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/vg_surject/{sample}.log"
+    threads: 25
+    benchmark:
+        "benchmarks/{sample}.rule_2.vg_surject.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'VG SURJECT starts' >> {log} && echo '-' >> {log} && "    # Add start time to log file
+        
+        "(vg surject -x {input.xg} -b {input.gam} -t {threads} > {output}) "                             # The shell command
+        "2>> {log}"                                                                                      # write CLI log to log file
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'GAM is surjected to BAM for {input.gam} with VG GIRAFFE' >> {log} "
+        " && echo '-' >> {log}"                                                                          # Add end time to log file
+
+
+
+
+# Add read groups to the BAM file
+rule add_readgroups:
+    input: 
+        bam="data/surjected_reads/{sample}_surjected.bam"
+    output:
+        temp("data/rg_added_reads/{sample}_rg_added.bam")
+    params:
+        ID="normal"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/add_rg/{sample}.log"
+    threads: 20
+    benchmark:
+        "benchmarks/{sample}.rule_3.add_rg.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'SAMTOOLS ADDREPLACERG starts' >> {log} && echo '-' >> {log} && "
+       
+        "(samtools addreplacerg  {input.bam} -@ {threads} -r ID:{params.ID} -r SM:{wildcards.sample} -o {output}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'RGIDs added to {input.bam} with SAMTOOLS' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+# sort the bam file
+rule sort_bam:
+    input: 
+        bam="data/rg_added_reads/{sample}_rg_added.bam"
+    output:
+        temp("data/sorted_reads/{sample}_sorted.bam")
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/bam_sort/{sample}.log"
+    threads: 20
+    benchmark:
+        "benchmarks/{sample}.rule_4.bam_sort.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'SAMTOOLS SORT starts' >> {log} && echo '-' >> {log} && "
+       
+        "(samtools sort  {input.bam} -@ {threads}  -o {output}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'BAM file is sorted for {input.bam} with SAMTOOLS' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+# mark duplicates
+rule mark_duplicates:
+    input: 
+        bam="data/sorted_reads/{sample}_sorted.bam"
+    output:
+        "data/markdup/{sample}_markdup.bam"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/markdup/{sample}.log"
+    threads: 20
+    benchmark:
+        "benchmarks/{sample}.rule_5.markdup.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'SAMTOOLS MARKDUP starts' >> {log} && echo '-' >> {log} && "
+       
+        "(samtools markdup  {input.bam} {output} -@ {threads}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Marked Duplicates for {input.bam} with SAMTOOLS' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+
+# index the bam file
+rule index_bam:
+    input: 
+        bam="data/markdup/{sample}_markdup.bam"
+    output:
+        "data/markdup/{sample}_markdup.bam.bai"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/index_bam/{sample}.log"
+    threads: 20
+    benchmark:
+        "benchmarks/{sample}.rule_6.index_bam.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'SAMTOOLS INDEX starts' >> {log} && echo '-' >> {log} && "
+       
+        "(samtools index  {input.bam} -@ {threads}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'BAM indexed for {input.bam} with SAMTOOLS' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+# call variants with the freebayes wrapper
+rule freebayes_parallel:
+    input:
+        bam="data/markdup/{sample}_markdup.bam",
+        bai="data/markdup/{sample}_markdup.bam.bai",
+        ref_fasta=config["reference_fasta"],
+        ref_index=config["reference_fasta_index"]
+    output:
+        "data/variant_calling/raw_variants/{sample}_raw_variants.vcf"
+    conda:
+        "envs/gg_environment.yaml"
+    params:
+        min_map_qual=10,
+        min_base_qual=10,
+        min_coverage=4
+    log:
+        "logs/freebayes_parallel/{sample}.log"
+    threads: 25
+    benchmark:
+        "benchmarks/{sample}.rule_7.freebayes_parallel.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'FREEBAYES_PARALLEL starts' >> {log} && echo '-' >> {log} && "
+       
+        "(freebayes-parallel <(fasta_generate_regions.py {input.ref_index} 100000) "
+        "{threads} -f {input.ref_fasta} {input.bam} --min-mapping-quality {params.min_map_qual} --min-base-quality {params.min_base_qual} --min-coverage {params.min_coverage} > {output}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants called for {input.bam} with FREEBAYES_PARALLEL' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+
+# convert mnps to snps using vcfallelicprimitives
+rule variant_processing:
+    input: 
+        vcf="data/variant_calling/raw_variants/{sample}_raw_variants.vcf"
+    output:
+        temp("data/variant_calling/processed_variants/{sample}_processed_variants.vcf")
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/variant_processing/{sample}.log"
+    benchmark:
+        "benchmarks/{sample}.rule_8.process_variants.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'Variant processing starts' >> {log} && echo '-' >> {log} && "
+       
+        "(vcfallelicprimitives  {input.vcf} > {output}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants processed for {input.vcf} with VCFALLELICPRIMITIVES' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+
+# filter variants with qual < 10
+rule variant_filtering:
+    input: 
+        vcf="data/variant_calling/processed_variants/{sample}_processed_variants.vcf"
+    output:
+        "data/variant_calling/filtered_variants/{sample}_filtered_variants.recode.vcf"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/variant_filtering/{sample}.log"
+    params:
+        min_qual=10,
+        out_name="data/variant_calling/filtered_variants/{sample}_filtered_variants"
+    benchmark:
+        "benchmarks/{sample}.rule_9.filter_variants.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'Variant filtration starts' >> {log} && echo '-' >> {log} && "
+       
+        "(vcftools  --vcf {input.vcf} --minQ {params.min_qual} --recode --out {params.out_name}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants processed for {input.vcf} with VCFALLELICPRIMITIVES' >> {log} "
+        " && echo '-' >> {log}"
+
+
+
+
+
+rule get_variants_stats:
+    input:
+        expand("data/variant_calling/filtered_variants/{sample}_filtered_variants.recode.vcf", sample = SAMPLES)
+    output:
+        "data/variant_calling/summary_gg_pipeline_variants.csv"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/summarized_variants.log"
+    benchmark:
+        "benchmarks/summarized_variants.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'Summarizing variants starts' >> {log} && echo '-' >> {log} && "
+        # Initiate CSV file
+        "echo 'Sample, Reference, Total_variant_count, SNP_count, Indel_count, ts_count, tv_count,  Het_Indels, Hom_Indels, Het_snp, Hom_snp' > {output} && "
+        
+        #get stats
+        "bash scripts/get_variant_stats.sh {input} "
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants summarized for all samples' >> {log} "
+        " && echo '-' >> {log}"
