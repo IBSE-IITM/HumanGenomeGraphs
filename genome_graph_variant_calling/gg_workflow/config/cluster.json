@@ -2,58 +2,70 @@
     "__default__" :
     {
         "cluster"   : "qsub",
-        "ncpus"       : 25
+        "nodes"     : 1,
+        "ppn"       : 25
     },
 
     "rule vg_giraffe" :
     {
-        "ncpus"       : 25
+        "ppn"       : 25
     },
 
 
     "rule vg_surject"  :
     {
-        "ncpus"       : 25
+        "ppn"       : 25
     },
 
     "rule add_readgroups" :
     {
-        "ncpus"       : 20
+        "ppn"       : 20
     },
     
     "rule sort_bam" :
     {
-        "ncpus"       : 20
+        "ppn"       : 20
     },
     
     "rule mark_duplicates" :
     {
-        "ncpus"       : 20
+        "ppn"       : 20
     },
 
     "rule index_bam" :
     {
-        "ncpus"       : 20
+        "ppn"       : 20
     },
 
     "rule freebayes_parallel" :
     {
-        "ncpus"       : 25
+        "ppn"       : 25
     },
 
     "rule variant_processing" :
     {
-        "ncpus"       : 1
+        "ppn"       : 1
     },
 
     "rule variant_filtering" :
     {
-        "ncpus"       : 1
+        "ppn"       : 1
+    },
+
+    "rule variant_normalization" :
+    {
+        "ppn"       : 25
+    },
+
+    "rule variant_sorting" :
+    {
+        "ppn"       : 1,
+        "mem"       : "250G"
     },
 
     "rule get_variants_stats" :
     {
-        "ncpus"       : 1
+        "ppn"       : 1
     }
 
 }

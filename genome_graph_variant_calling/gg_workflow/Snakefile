@@ -8,8 +8,8 @@ def get_sample_names():
     import glob
     sample_names = []
     for file in glob.glob('data/samples/*.fastq.gz'):
-        sample_names.append(file[13:-11]) 
-        # "/data/samples/" = 13 characters &&  "_1.fastq.gz" = 11 characters
+        sample_names.append(file[13:-12]) 
+        # "/data/samples/" = 13 characters &&  ".R1.fastq.gz" = 11 characters
     return list(set(sample_names))
 
 # SAMPLES = ["HG001", "HG002"] # uncomment to run per sample by mentioning list of sample names
@@ -29,8 +29,8 @@ rule vg_giraffe:
         gbz=config["gbz_index"],
         min=config["min_index"],
         dist=config["dist_index"],
-        R1_fq="data/samples/{sample}_1.fastq.gz",
-        R2_fq="data/samples/{sample}_2.fastq.gz"
+        R1_fq="data/samples/{sample}.R1.fastq.gz",
+        R2_fq="data/samples/{sample}.R2.fastq.gz"
     output:
         temp("data/mapped_reads/graph_mapped_{sample}.gam")
     conda:
@@ -246,6 +246,7 @@ rule variant_filtering:
     params:
         min_qual=10,
         out_name="data/variant_calling/filtered_variants/{sample}_filtered_variants"
+    threads: 25
     benchmark:
         "benchmarks/{sample}.rule_9.filter_variants.benchmark.txt"
     shell:
@@ -258,12 +259,57 @@ rule variant_filtering:
         " && echo '-' >> {log}"
 
 
+# normalise the variants. Split multi-allelic sites
+rule variant_normalization:
+    input: 
+        vcf="data/variant_calling/filtered_variants/{sample}_filtered_variants.recode.vcf"
+    output:
+        "data/variant_calling/normalized_variants/{sample}_normalized_variants.vcf.gz"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/variant_normalization/{sample}.log"
+    params:
+        out_name="data/variant_calling/normalized_variants/{sample}_normalized_variants.vcf.gz"
+    threads: 25
+    benchmark:
+        "benchmarks/{sample}.rule_10.variant_normalization.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'Variant normalization starts' >> {log} && echo '-' >> {log} && "
+       
+        "(bcftools norm -m- {input.vcf} -Oz -o {params.out_name} --threads {threads}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants normalization for {input.vcf} with bcftools' >> {log} "
+        " && echo '-' >> {log}"
 
 
+# Sort and index the normalised variants
+rule variant_sorting:
+    input: 
+        vcf="data/variant_calling/normalized_variants/{sample}_normalized_variants.vcf.gz"
+    output:
+        "data/variant_calling/final_sorted_variants/{sample}_final_sorted_variants.vcf.gz"
+    conda:
+        "envs/gg_environment.yaml"
+    log:
+        "logs/variant_sorting/{sample}.log"
+    params:
+        out_name="data/variant_calling/final_sorted_variants/{sample}_final_sorted_variants.vcf.gz"
+    benchmark:
+        "benchmarks/{sample}.rule_11.variant_sorting.benchmark.txt"
+    shell:
+        "echo $(date '+%d/%m/%y    %H:%M:%S'): 'Variant sorting starts' >> {log} && echo '-' >> {log} && "
+       
+        "(bcftools sort {input.vcf} -T ./tmp -Oz -o {params.out_name} --max-mem 256G && tabix -p vcf {params.out_name}) "
+        "2>> {log}"
+
+        " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants sorting for {input.vcf} with bcftools' >> {log} "
+        " && echo '-' >> {log}"
 
 rule get_variants_stats:
     input:
-        expand("data/variant_calling/filtered_variants/{sample}_filtered_variants.recode.vcf", sample = SAMPLES)
+        expand("data/variant_calling/final_sorted_variants/{sample}_final_sorted_variants.vcf.gz", sample = SAMPLES)
     output:
         "data/variant_calling/summary_gg_pipeline_variants.csv"
     conda:
@@ -282,3 +328,9 @@ rule get_variants_stats:
 
         " && echo '-' >> {log} && echo $(date '+%d/%m/%y    %H:%M:%S'):  'Variants summarized for all samples' >> {log} "
         " && echo '-' >> {log}"
+
+
+
+
+
+
