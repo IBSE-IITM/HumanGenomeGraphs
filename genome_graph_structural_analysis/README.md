@@ -56,11 +56,8 @@ snakemake --cores [integer]--jobs [integer] -p -r
 > --cores : Use at most N CPU cores/jobs in parallel
 > --jobs : max number of jobs to be performed parallely. <br>
 > --use-conda: to enable conda through job scheduler <br>
->
 > *Optional parameters:* <br>
 > -p & -r: print the command and the reason to run the command
-<br> 
-> --cluster: the qsub command that snakemake uses to submit individual jobs. <br>
 > --forceall: Mandatorily run all the rules in the Snakefile <br>
 > --rerun-incomplete: If the analysis stops before completion, this parameter can be added to recreate any incomplete files. <br>
 
