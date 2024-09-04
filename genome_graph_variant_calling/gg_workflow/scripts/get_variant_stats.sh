@@ -1,6 +1,8 @@
 # Script to extract variant counts and QC metrics from vcf files created by "rule variant_filtering" in the gg_workflow
 # Usage: bash get_variant_stats.sh [vcf files of samples]
-
+#
+# Author: Venkatesh Kamaraj
+# Contact: ic11570@imail.iitm.ac.in
 
 # Command below is for error handling in bash. Stops execution of the script once an error is faced.
 set -euo pipefail

@@ -1,0 +1,15 @@
+name: structure_gg
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - vg=1.42.0
+  - circos
+  - networkx
+  - pandas
+  - r-argparse
+  - r-ggplot2
+  - r-dplyr
+  - r-reshape2
+  - snakemake

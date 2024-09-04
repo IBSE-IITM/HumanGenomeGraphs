@@ -1,0 +1,50 @@
+# # Parameters for Genome Graph Construction
+
+# Absolute Path to the linear reference genome
+linear_reference_genome: [Relevant path]/Homo_sapiens_assembly38.fasta
+# Should be string
+
+
+# Absolute Path to the Karyptype file
+karyotype_file: [Relevant path]/datasets/input_files/karyotype.human.hg38.txt
+# Should be string
+
+
+
+
+
+# # Parameters for strutural analysis of genome graphs
+
+# Width of a bin in bp - the reference path broken into bins and subgraphs made for each bin
+Bin_Width: 10000000
+# Should be Integer
+
+
+# Minimum number of continious nodes with no variability to be termed as Invariant Zone
+Invariance_cutoff: 1000
+# Should be Integer
+
+
+# Choice to save the [Genomic_location, Node_id] lookup table
+Save_Lookup: "yes"
+# Should be "yes" or "no"
+
+
+
+
+
+# # Parameters for file collation
+
+# Colour of the bars depicting variability of genome graphs (Inner track)
+Variability_Color: "vdgreen_a3"
+# Should be string
+
+
+# Colour of the bars depicting hypervariability of genome graphs (Outer track)
+Hypervariability_Colour: "vdred_a3"
+# Should be string
+
+
+# Multiplier for Ticks representing the genomic locations at bin widths
+Ticks_Multiplier: "1e-6"
+# Should be string

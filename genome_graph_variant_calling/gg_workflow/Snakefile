@@ -1,3 +1,19 @@
+'''
+Snakefile to run the following workflow: 
+   1) Map raw sequence to genome graph with vg giraffe
+   2) Surject the GAM to BAM file with vg surject
+   3) Process the BAM file: add_read_groups, sort, mark_duplicates
+   4) Call variants with freebayes-parallel and process the resultant VCF file
+   5) Compute summary metrics for all the processed VCF files
+
+Required Inputs: 
+   1) Genome Graph constructed with VG toolkit and autoindexed with the following indices: .min, .dist, .gbz
+   2) Paired raw sequencing reads in FASTQ format. Location: "data/samples/"
+        FASTQ files should be names as "data/samples/{sample}_1.fastq.gz" and "data/samples/{sample}_2.fastq.gz"
+Author: Venkatesh Kamaraj
+Contact: ic11570@imail.iitm.ac.in
+'''
+
 
 configfile: "config/config.yaml"
 
