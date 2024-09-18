@@ -26,7 +26,7 @@ conda activate structure_gg
 <br>
 <br> 
 
-**Analysis of WGS w.r.t. genome graphs**
+**Structural Analysis of genome graphs**
 
 The directory contains a portable Snakemake based workflow that can be used for the structural analysis of genome graphs.
 
@@ -36,18 +36,20 @@ The directory contains a portable Snakemake based workflow that can be used for 
 
 3) Move the karyotype file describing the chromosomes into ```datasets/input_files/```. The current directory contains the karyotype file for human reference genome GRCH38.
 
-4) Activate the ```structure_gg``` conda environment.
+4) Optionally the parameters of the analysis (like the bin_width for subgraph creation, node_cutoff for invariance etc.) can also be altered in ```config/config.yaml```.
+
+5) Activate the ```structure_gg``` conda environment.
 ```
 conda activate structure_gg
 ```
 
-5) Perform a Snakemake dry run to ensure that the workflow works.
+6) Perform a Snakemake dry run to ensure that the workflow works.
 ```
 snakemake -npr
 ``` 
 
 
-6) Once the dry run has run successfully, the structural analysis can be started with the command below:
+7) Once the dry run has run successfully, the structural analysis can be started with the command below:
 ```
 snakemake --cores [integer]--jobs [integer] -p -r 
 ```
