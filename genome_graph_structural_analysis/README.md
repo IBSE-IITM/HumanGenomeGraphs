@@ -30,11 +30,16 @@ conda activate structure_gg
 
 The directory contains a portable Snakemake based workflow that can be used for the structural analysis of genome graphs.
 
-1) Move the processed bgzipped and indexed VCF files to ```datasets/input_files/processed_vcf_files/```. The files should have the extension .vcf.gz and the correspnding indices should have the extension .vcf.gz.tbi
+1) Move the processed bgzipped and indexed VCF files to ```datasets/input_files/processed_vcf_files/```. 
+    * The variants in each contig should be present in individual VCF files. VCF files should be names as CONTIG_NAME.vcf.gz
+    * CONTIG_NAME should match the headers in the FASTA file as well as the CHROM column in the VCF file
+    * The corresponding index file should be named CONTIG_NAME.vcf.gz.tbi
 
 2) Edit the filepaths of the linear reference genome and the karyotype file in ```config/config.yaml```.
 
-3) Move the karyotype file describing the chromosomes into ```datasets/input_files/```. The current directory contains the karyotype file for human reference genome GRCH38.
+3) Move the karyotype file describing the chromosomes into ```datasets/input_files/```. 
+    * This repo when cloned will contain the karyotype file for human reference genome GRCH38
+    * Make sure the keys for individual contigs in the karyotype file match the CONTIG_NAME in the VCF filename
 
 4) Optionally the parameters of the analysis (like the bin_width for subgraph creation, node_cutoff for invariance etc.) can also be altered in ```config/config.yaml```.
 
@@ -45,13 +50,13 @@ conda activate structure_gg
 
 6) Perform a Snakemake dry run to ensure that the workflow works.
 ```
-snakemake -npr
+snakemake -n
 ``` 
 
 
 7) Once the dry run has run successfully, the structural analysis can be started with the command below:
 ```
-snakemake --cores [integer]--jobs [integer] -p -r 
+snakemake --cores [integer]--jobs [integer] -p 
 ```
 
 > Note: Edit the parameters accordingly <br>
