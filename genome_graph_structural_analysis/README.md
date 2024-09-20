@@ -72,7 +72,7 @@ snakemake --cores [integer]--jobs [integer] -p
 Kindly look into [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/) for more details.
 
 
-*Note: As circos plots are used to create a single figure depiction of the entire genome graph with all the chromosomes, the bin_width has to be altered such that thre is less than 360 bin in total across all the chromosomes. The visualization of the circos plot can be neglected to avoid any resolution limitation of this analysis, allowing bin_width to be as small as possible.*
+*Note: As circos plots are used to create a single figure depiction of the entire genome graph with all the chromosomes, the bin_width has to be altered such that there is less than 360 bins in total, across all the chromosomes. The visualization of the circos plot can be neglected to avoid any resolution limitation of this analysis, allowing the bin_width to be as small as possible.*
 
 8) For increased resolution of analysis, the workflow can be forced to omit the creation of single figure depiction of the genome graph with the following command:
 ```
