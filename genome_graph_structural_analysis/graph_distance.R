@@ -32,11 +32,11 @@ correlation_calculator <- function(metric_count_df, pop_1, pop_2){
 
 
 # read all the population-specific 
-EUR_variability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/EUR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-AMR_variability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/AMR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-AFR_variability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/AFR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-SAS_variability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/SAS_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-EAS_variability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/EAS_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+EUR_variability <- read.csv("./population_specific_genome_graphs/EUR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+AMR_variability <- read.csv("./population_specific_genome_graphs/AMR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+AFR_variability <- read.csv("./population_specific_genome_graphs/AFR_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+SAS_variability <- read.csv("./population_specific_genome_graphs/SAS_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+EAS_variability <- read.csv("./population_specific_genome_graphs/EAS_genome_graph/datasets/collated_results/genome_graph_variability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
 
 # merge the variability values based on chr, start, end
 total_variabiliy <- list(EUR_variability, AMR_variability, AFR_variability, SAS_variability, EAS_variability) %>% reduce(inner_join, by=c("Chr", "Start", "End"))
@@ -110,7 +110,7 @@ variability_distance_plot <- ggplot(variability_distance_matrix_melted, aes(Popu
         plot.subtitle = element_text(size = 18),
         legend.title = element_blank())
 
-ggsave("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/variability_distance_plot.png", 
+ggsave("./population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/variability_distance_plot.png", 
         plot = variability_distance_plot, dpi = 600, width = 8, height = 20, units = "in")
 
 
@@ -138,7 +138,7 @@ variability_correlation_plot <- ggplot(variability_correlation_matrix_melted, ae
         legend.title = element_blank())
 
 
-ggsave("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/variability_correlation_plot.png", 
+ggsave("./population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/variability_correlation_plot.png", 
         plot = variability_correlation_plot, dpi = 600, width = 8, height = 20, units = "in")
 
 
@@ -153,11 +153,11 @@ ggsave("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome
 
 
 # read all the population-specific 
-EUR_hypervariability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/EUR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-AMR_hypervariability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/AMR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-AFR_hypervariability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/AFR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-SAS_hypervariability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/SAS_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
-EAS_hypervariability <- read.csv("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/EAS_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+EUR_hypervariability <- read.csv("./population_specific_genome_graphs/EUR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+AMR_hypervariability <- read.csv("./population_specific_genome_graphs/AMR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+AFR_hypervariability <- read.csv("./population_specific_genome_graphs/AFR_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+SAS_hypervariability <- read.csv("./population_specific_genome_graphs/SAS_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
+EAS_hypervariability <- read.csv("./population_specific_genome_graphs/EAS_genome_graph/datasets/collated_results/genome_graph_hypervariability.tsv", sep = "\t", header = FALSE, col.names = c("Chr", "Start", "End", "Variability"))
 
 # merge the hypervariability values based on chr, start, end
 total_hypervariability <- list(EUR_hypervariability, AMR_hypervariability, AFR_hypervariability, SAS_hypervariability, EAS_hypervariability) %>% reduce(inner_join, by=c("Chr", "Start", "End"))
@@ -224,7 +224,7 @@ hypervariability_distance_plot <- ggplot(hypervariability_distance_matrix_melted
         plot.subtitle = element_text(size = 18),
         legend.title = element_blank())
 
-ggsave("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/hypervariability_distance_plot.png", 
+ggsave("./population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/hypervariability_distance_plot.png", 
         plot = hypervariability_distance_plot, dpi = 600, width = 8, height = 20, units = "in")
 
 
@@ -252,7 +252,7 @@ hypervariability_correlation_plot <- ggplot(hypervariability_correlation_matrix_
         legend.title = element_blank())
 
 
-ggsave("/cn4/data4/venkatesh_data4/1KGP_genome_graphs/population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/hypervariability_correlation_plot.png", 
+ggsave("./population_specific_genome_graphs/comparatory_analysis/graph_distance_analysis/hypervariability_correlation_plot.png", 
         plot = hypervariability_correlation_plot, dpi = 600, width = 8, height = 20, units = "in")
 
 
